@@ -1,9 +1,13 @@
 "use strict";
 
+import syncSortedMerge from "./solution/sync-sorted-merge";
+import asyncSortedMerge from "./solution/async-sorted-merge";
+import {LogSourceType, PrinterType} from "./types/types";
+
 const LogSource = require("./lib/log-source");
 const Printer = require("./lib/printer");
 
-function runSolutions(sourceCount) {
+function runSolutions(sourceCount: number) {
   return new Promise((resolve, reject) => {
     /**
      * Challenge Number 1!
@@ -25,14 +29,15 @@ function runSolutions(sourceCount) {
      * This function will ensure that what you print is in fact in chronological order.
      * Call 'printer.done()' at the end to get a few stats on your solution!
      */
-    const syncLogSources = [];
+    const syncLogSources: LogSourceType[] = [];
     for (let i = 0; i < sourceCount; i++) {
       syncLogSources.push(new LogSource());
     }
+    const printer: PrinterType = new Printer();
     try {
-      require("./solution/sync-sorted-merge")(syncLogSources, new Printer());
-      resolve();
-    } catch (e) {
+      syncSortedMerge(syncLogSources, printer);
+      resolve(undefined);
+    } catch (e: any) {
       reject(e);
     }
   }).then(() => {
@@ -50,11 +55,12 @@ function runSolutions(sourceCount) {
        * This function will ensure that what you print is in fact in chronological order.
        * Call 'printer.done()' at the end to get a few stats on your solution!
        */
-      const asyncLogSources = [];
+      const asyncLogSources: LogSourceType[] = [];
       for (let i = 0; i < sourceCount; i++) {
         asyncLogSources.push(new LogSource());
       }
-      require("./solution/async-sorted-merge")(asyncLogSources, new Printer())
+      const printer: PrinterType = new Printer();
+      asyncSortedMerge(asyncLogSources, printer)
         .then(resolve)
         .catch(reject);
     });
