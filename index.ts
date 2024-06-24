@@ -2,7 +2,7 @@
 
 import syncSortedMerge from "./solution/sync-sorted-merge";
 import asyncSortedMerge from "./solution/async-sorted-merge";
-import {LogSourceType, PrinterType} from "./types/types";
+import {LogSourceType} from "./types/types";
 
 const LogSource = require("./lib/log-source");
 const Printer = require("./lib/printer");
@@ -33,9 +33,8 @@ function runSolutions(sourceCount: number) {
     for (let i = 0; i < sourceCount; i++) {
       syncLogSources.push(new LogSource());
     }
-    const printer: PrinterType = new Printer();
     try {
-      syncSortedMerge(syncLogSources, printer);
+      syncSortedMerge(syncLogSources, new Printer());
       resolve(undefined);
     } catch (e: any) {
       reject(e);
@@ -59,8 +58,7 @@ function runSolutions(sourceCount: number) {
       for (let i = 0; i < sourceCount; i++) {
         asyncLogSources.push(new LogSource());
       }
-      const printer: PrinterType = new Printer();
-      asyncSortedMerge(asyncLogSources, printer)
+      asyncSortedMerge(asyncLogSources, new Printer())
         .then(resolve)
         .catch(reject);
     });

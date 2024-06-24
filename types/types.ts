@@ -5,9 +5,7 @@ export interface LogItem {
 }
 
 export interface LogSourceType {
-  drained: boolean;
-  last: LogItem;
-  getNextPseudoRandomEntry: () => LogItem;
+  delay?: number;
   pop: () => LogItem|false;
   popAsync: () => Promise<LogItem|false>;
 }
@@ -17,9 +15,8 @@ export interface LogItemWithSource extends LogItem {
 }
 
 export interface PrinterType {
-  last: Date;
-  logsPrinted: number;
-  startTime: Date|undefined;
   print: (item: LogItem) => void;
   done: () => void;
 }
+
+export type BinarySearchInsertComparator<T> = (item1: T, item2: T) => number;
