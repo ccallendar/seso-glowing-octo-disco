@@ -2,20 +2,25 @@
   "name": "seso-coding-challange",
   "version": "1.0.0",
   "description": "Coding Challenge",
-  "main": "index.js",
+  "author": "Chris Callendar",
+  "main": "index.ts",
   "scripts": {
     "start": "ts-node index.ts",
-    "test": "./node_modules/jest/bin/jest.js"
+    "test": "jest"
   },
   "license": "BSD-2-Clause",
   "dependencies": {
-    "@types/bluebird": "^3.5.42",
-    "@types/node": "^20.14.8",
     "bluebird": "^3.4.1",
     "Faker": "~0.7.0",
-    "jest": "^26.6.3",
+    "jest": "^29.7.0",
     "lodash": "^4.13.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.5.2"
+  },
+  "devDependencies": {
+    "@types/bluebird": "^3.5.42",
+    "@types/jest": "^29.5.12",
+    "@types/node": "^20.14.8",
+    "ts-jest": "^29.1.5"
   }
 }
