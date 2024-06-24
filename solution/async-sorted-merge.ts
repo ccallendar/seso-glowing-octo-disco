@@ -1,63 +1,66 @@
 "use strict";
 
 import {LogItem, LogItemWithSource, LogSourceType, PrinterType} from "../types/types";
-import {sortItemsByDate} from "../utils/utils";
+import {binarySearchInsert, sortLogItemsByDate} from "../utils/utils";
+import {PreloadSource} from "../lib/PreloadSource";
 
 // Print all entries, across all of the *async* sources, in chronological order.
 
-export default async (logSources: LogSourceType[], printer: PrinterType) => {
+export default async (logSources: LogSourceType[], printer: PrinterType, preload = true) => {
   return new Promise(async (resolve, reject) => {
     // 0. This will store the sorted items that haven't been printed yet
     const items: LogItemWithSource[] = [];
 
-    // 1. Pop first item off each source, attach the LogSource and add to items array
-    const promises: Promise<LogItemWithSource|false>[] = logSources.map((source) =>
-      source.popAsync().then((item: LogItem|false) => {
-      if (item) {
-        const itemWithSource = (item as LogItemWithSource);
-        itemWithSource.source = source;
-        return itemWithSource;
-      }
-      return false;
-    }));
-
-    try {
-      // Resolve all promises at once, faster than sequentially doing it
-      const allItems: (LogItemWithSource|false)[] = await Promise.all(promises);
-      // Filter out any false values
-      allItems.forEach((item: LogItemWithSource|false) => {
-        if (item) {
-          items.push(item);
-        }
-      });
-    } catch (e: any) {
-      reject(e);
+    // 1. Wrap all sources in a preloader to speed up async delays
+    // It attempts to preload an item
+    if (preload) {
+      logSources = logSources.map((input: LogSourceType) => new PreloadSource(input));
     }
 
-    // 2. Sort items, oldest first
-    items.sort(sortItemsByDate);
+    // 2. Pop first item off each source
+    const promises = logSources.map((source) =>
+      source.popAsync().then((item: LogItem|false) => {
+      if (item) {
+        // 2A. attach the LogSource
+        (item as LogItemWithSource).source = source;
+        // 2B. add item into array in sorted order
+        binarySearchInsert(items, item, sortLogItemsByDate);
+      }
+      return item;
+    }));
 
-    // 3. Keep popping off the first item - it will be the oldest
-    // And add the next item from the same source, into the correct index in the sorted array
+    // 3. Resolve all promises at once, faster than sequentially doing it
+    try {
+      await Promise.all(promises);
+    } catch (e: any) {
+      reject(e);
+      return undefined;
+    }
+
+    // 4. Repeat until there are no more items
     while (items.length > 0) {
+      // 4A. Pop off and print the first item - it will be the oldest
       let oldest: LogItemWithSource = items.shift();
       printer.print(oldest);
 
-      // 3A. Get the next item from the same source
+      // 4B. Get the next item from the same source
       const { source } = oldest;
-      const newItem: LogItem|false = await source.popAsync();
-      if (newItem) {
-        // Lazy way - add then sort again
-        // Should use a BST or something more efficient
-        const itemWithSource = (newItem as LogItemWithSource);
-        itemWithSource.source = source;
-        items.unshift(itemWithSource)
-        items.sort(sortItemsByDate);
+      try {
+        const newItem: LogItem | false = await source.popAsync();
+        if (newItem) {
+          (newItem as LogItemWithSource).source = source;
+          binarySearchInsert(items, newItem, sortLogItemsByDate);
+        }
+      } catch (e: any) {
+        // TODO we might not want to abort, and instead continue logging?
+        reject(e);
+        return undefined;
       }
     }
 
     printer.done();
     console.log("Async sort complete.")
     resolve(undefined);
+    return undefined;
   });
 };
