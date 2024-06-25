@@ -5,7 +5,6 @@ export interface LogItem {
 }
 
 export interface LogSourceType {
-  delay?: number;
   pop: () => LogItem|false;
   popAsync: () => Promise<LogItem|false>;
 }

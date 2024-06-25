@@ -1,11 +1,11 @@
 import {LogItem, LogSourceType} from "../types/types";
 
 /**
- * A simple wrapper class that captures all the items from a source
- * so that it can be replayed to test different algorithms.
+ * A simple wrapper class around a LogSource that will preload
+ * the next item to reduce the delay in waiting for the next item to load.
  *
- * It doesn't support popAsync since the async delay is random and not reproducible
- * without making changes to LogSource.
+ * This could be extended to preload more items (e.g. 10-20), but it wasn't trivial
+ * so I decided to keep it simple.
  */
 export class PreloadSource implements LogSourceType {
   source: LogSourceType;

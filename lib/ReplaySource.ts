@@ -5,8 +5,8 @@ const P = require("bluebird");
  * A simple wrapper class that captures all the items from a source
  * so that it can be replayed to test different algorithms.
  *
- * It doesn't support popAsync since the async delay is random and not reproducible
- * without making changes to LogSource.
+ * The popAsync() function is not identical since the async delay is a random number.
+ * Instead, a default value of 4ms was used for testing purposes.
  */
 export class ReplaySource implements LogSourceType {
   source: LogSourceType;
@@ -45,10 +45,8 @@ export class ReplaySource implements LogSourceType {
     return item;
   }
 
-  // Doesn't support replay since the delay is not known
   async popAsync():Promise<LogItem|false> {
     // Won't be exactly the same - different delay
-
     let item: LogItem|false;
     if (this.isReplay) {
       if (this.replayIndex < this.items.length) {

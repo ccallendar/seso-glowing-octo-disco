@@ -1,8 +1,8 @@
 "use strict";
 
+import {PreloadSource} from "../lib/PreloadSource";
 import {LogItem, LogItemWithSource, LogSourceType, PrinterType} from "../types/types";
 import {binarySearchInsert, sortLogItemsByDate} from "../utils/utils";
-import {PreloadSource} from "../lib/PreloadSource";
 
 // Print all entries, across all of the *async* sources, in chronological order.
 
